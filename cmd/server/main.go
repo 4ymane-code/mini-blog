@@ -1,15 +1,42 @@
 package main
 
 import (
-	"net/http"
+	"log"
+	"os"
 
+	"github.com/4ymane-code/mini-blog/internal/api"
+	"github.com/4ymane-code/mini-blog/internal/store"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println(".env file is not found")
+	}
+
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := gin.Default()
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+
+	postHandler := api.NewPostHandler(db)
+	r.GET("/posts", postHandler.GetPosts)
+	r.POST("/posts", postHandler.CreatePosts)
+
+	r.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{"status": "ok"})
 	})
-	r.Run(":8080")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("server listening on port", port)
+	r.Run(":" + port)
 }
