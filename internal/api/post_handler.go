@@ -17,7 +17,7 @@ func NewPostHandler(db *gorm.DB) *PostHandler {
 	return &PostHandler{DB: db}
 }
 
-func (h *PostHandler) CreatePosts(ctx gin.Context) {
+func (h *PostHandler) CreatePosts(ctx *gin.Context) {
 	var input store.Post
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch posts"})
@@ -32,7 +32,7 @@ func (h *PostHandler) CreatePosts(ctx gin.Context) {
 	ctx.JSON(http.StatusCreated, input)
 }
 
-func (h *PostHandler) GetPosts(ctx gin.Context) {
+func (h *PostHandler) GetPosts(ctx *gin.Context) {
 	var posts []store.Post
 	if err := h.DB.Find(&posts).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch post"})

@@ -3,15 +3,15 @@ package store
 import "time"
 
 type User struct {
-	ID           uint      `grom:"primaryKey" json:"id"`
-	Username     string    `grom:"unique" json:"username"`
-	Email        string    `grom:"unique" json:"email"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	Username     string    `gorm:"unique" json:"username"`
+	Email        string    `gorm:"unique" json:"email"`
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"created_at"`
 }
 
 type Post struct {
-	ID        uint      `grom:"primaryKey" json:"id"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	AuthorID  uint      `json:"author_id"`
