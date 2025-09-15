@@ -31,10 +31,16 @@ func main() {
 	r.GET("/posts", postHandler.GetPosts)
 	r.POST("/posts", postHandler.CreatePosts)
 	r.GET("/secure/posts", auth.JWTMiddleware(), postHandler.GetPosts)
+	r.POST("/posts", auth.JWTMiddleware(), postHandler.CreatePost)
+	r.PUT("/posts/:id", auth.JWTMiddleware(), postHandler.UpdatePost)
+	r.DELETE("/posts/:id", auth.JWTMiddleware(), postHandler.DeletePost)
 
 	authHandler := api.NewAuthHandler(db)
 	r.POST("/auth/register", authHandler.Register)
 	r.POST("/auth/login", authHandler.Login)
+	r.POST("/posts", auth.JWTMiddleware(), postHandler.CreatePost)
+	r.PUT("/posts/:id", auth.JWTMiddleware(), postHandler.UpdatePost)
+	r.DELETE("/posts/:id", auth.JWTMiddleware(), postHandler.DeletePost)
 
 	r.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{"status": "ok"})
