@@ -40,3 +40,60 @@ func (h *PostHandler) GetPosts(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, posts)
 }
+
+func (h *PostHandler) CreatePost(c *gin.Context) {
+	var input struct {
+		Title    string `json:"title"`
+		Content  string `json:"content"`
+		AuthorID uint   `json:"author_id"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	post := store.Post{
+		Title:    input.Title,
+		Content:  input.Content,
+		AuthorID: input.AuthorID,
+	}
+	if err := h.DB.Create(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create post"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, post)
+}
+
+func (h *PostHandler) UpdatePost(c *gin.Context) {
+	id := c.Param("id")
+	var post store.Post
+	if err := h.DB.First(&post, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
+		return
+	}
+
+	var input struct {
+		Title   string `json:"title"`
+		Content string `json:"content"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	post.Title = input.Title
+	post.Content = input.Content
+	h.DB.Save(&post)
+
+	c.JSON(http.StatusOK, post)
+}
+
+func (h *PostHandler) DeletePost(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.DB.Delete(&store.Post{}, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete post"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
+}
